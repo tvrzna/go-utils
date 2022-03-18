@@ -1,6 +1,12 @@
 package args
 
-import "strings"
+import (
+	"strings"
+)
+
+const (
+	delimiter = "="
+)
 
 // ArgumentHandler defines function used for ParseArgs method.
 type ArgumentHandler func(arg, nextArg string)
@@ -15,6 +21,13 @@ func ParseArgs(args []string, handler ArgumentHandler) {
 				nextArg = val
 			}
 		}
+		if strings.Contains(arg, delimiter) {
+			nextArg = arg[strings.Index(arg, delimiter)+1 : len(arg)]
+			arg = arg[0:strings.Index(arg, delimiter)]
+			if (strings.HasPrefix(nextArg, "'") && strings.HasSuffix(nextArg, "'")) || (strings.HasPrefix(nextArg, "\"") && strings.HasSuffix(nextArg, "\"")) {
+				nextArg = nextArg[1 : len(nextArg)-1]
+			}
+		}
 		handler(arg, nextArg)
 	}
 }
@@ -23,7 +36,7 @@ func ParseArgs(args []string, handler ArgumentHandler) {
 func ContainsArg(args []string, arg ...string) bool {
 	for _, v := range args {
 		for _, a := range arg {
-			if v == a {
+			if v == a || (strings.Contains(v, delimiter) && v[0:strings.Index(v, delimiter)] == a) {
 				return true
 			}
 		}

@@ -3,7 +3,7 @@ package args
 import "testing"
 
 func TestParseArgs(t *testing.T) {
-	args := []string{"-a", "-b", "hello there", "-c"}
+	args := []string{"-a", "-b", "hello there", "-c", "--d='hello here'"}
 
 	handledA := false
 	dataA := ""
@@ -11,6 +11,8 @@ func TestParseArgs(t *testing.T) {
 	dataB := ""
 	handledC := false
 	dataC := ""
+	handledD := false
+	dataD := ""
 
 	ParseArgs(args, func(arg, nextArg string) {
 		switch arg {
@@ -23,6 +25,9 @@ func TestParseArgs(t *testing.T) {
 		case "-c":
 			handledC = true
 			dataC = nextArg
+		case "--d":
+			handledD = true
+			dataD = nextArg
 		}
 	})
 
@@ -37,16 +42,25 @@ func TestParseArgs(t *testing.T) {
 	if !handledC || dataC != "" {
 		t.Error("TestParseArgs: argument C was not handled or had unexpected next argument")
 	}
+
+	if !handledD || dataD == "" {
+		t.Log(dataD)
+		t.Error("TestParseArgs: argument D was not handled or had unexpected next argument")
+	}
 }
 
 func TestContainsArg(t *testing.T) {
-	args := []string{"-a", "-b"}
+	args := []string{"-a", "-b", "--d='hello there'"}
 
-	if !ContainsArg(args, "--a", "-a", "--b") {
+	if !ContainsArg(args, "--a", "-a", "--b", "-d") {
 		t.Error("TestContainsArg: expected argument was not found")
 	}
 
 	if ContainsArg(args, "--b") {
 		t.Error("TestContainsArg: unexpected argument was found")
+	}
+
+	if !ContainsArg(args, "--d") {
+		t.Error("TestContainsArg: expected argument was not found")
 	}
 }
